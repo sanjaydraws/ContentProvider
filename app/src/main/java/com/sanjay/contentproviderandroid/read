@@ -1,0 +1,47 @@
+content provider : help to access to data stored by itself, stored by other apps,
+and provide a way to share data with other apps.
+
+content provider provides abstraction from handling this inter process communication
+in real word scenerio app1 could be a context which contains different  context stored by user in the device
+and app2 coul be whatsapp/skype which trying to  access context stored in device
+
+for app2 perespective it doesn't matter how the stored in context app,(
+  it could be savedin file,json, database
+)
+
+--------------------     data request        content resolver
+|  process/app1     | <----------------------- process /App2     |
+|                   |                        |  whatsapp/skype   |
+|  database/private |                        |                   |
+|                   |                        |                   |
+|                   |     data response      |                   |
+|\  content provider|----------------------->  cursor            |
+___________________                          |                   |
+                                             _____________________
+
+
+how does app1 expose it's data securely to app2 -> content provider
+
+
+context object contains a method  getContentResolver () returns instance of content resolver
+to hit correct correct content provider ,need Uri (Uri woold be unique for Cp)
+
+
+content resolver provide ->Crud Methods also can perform batch operation
+
+
+===========================
+data return from content provider is tabular form
+
+cursor -> is an api that allows to traverse those rows in tabular data
+
+// query is equivalent to select query
+//  most of the uri defined under android.provider
+getContentResolver().query(<ContentProvider>.CONTENT_URI,mProjection,mSelctionClause,mSortOrder)
+
+mProjection (no of columns that we want ot query ) - string array representing names of columns
+mSelctionClause - > equivalent to where clause
+mSortOrder(String type) -> order in which want  query to sorted
+
+
+
