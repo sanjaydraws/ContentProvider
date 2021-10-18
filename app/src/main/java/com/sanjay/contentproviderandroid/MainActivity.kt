@@ -2,14 +2,16 @@ package com.sanjay.contentproviderandroid
 
 import android.content.ContentResolver
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.sanjay.contentproviderandroid.data.Contacts
+import com.sanjay.contentproviderandroid.data.Directory
 import com.sanjay.contentproviderandroid.databinding.ActivityMainBinding
+import com.sanjay.contentproviderandroid.helper.getContactsList
 
 
 class MainActivity : AppCompatActivity() {
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             // ask permission if permission denied
             ActivityCompat.requestPermissions(this, arrayOf(getPermissionString(PERMISSION_READ_CONTACT)), REQUEST_PERMISSIONS)
         } else {
-            val allContacts = getContacts()
+            val allContacts = getContactsList()
             Log.d("MAin", "onRequestPermissionsResult: $allContacts")
         }
     }
@@ -75,42 +77,6 @@ class MainActivity : AppCompatActivity() {
 //    }
 
 
-    private fun getContacts(): StringBuilder {
-        val builder = StringBuilder()
-        val resolver: ContentResolver = contentResolver;
-        val cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null,
-            null)
-
-        if (cursor?.count?:0 > 0) {
-            while (cursor?.moveToNext() == true) {
-                val id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
-                val name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
-                val phoneNumber = (cursor.getString(
-                    cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))).toInt()
-
-                if (phoneNumber > 0) {
-                    val cursorPhone = contentResolver.query(
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?", arrayOf(id), null)
-
-                    if(cursorPhone?.count?:0 > 0) {
-                        while (cursorPhone?.moveToNext() == true) {
-                            val phoneNumValue = cursorPhone.getString(
-                                cursorPhone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                            builder.append("Contact: ").append(name).append(", Phone Number: ").append(
-                                phoneNumValue).append("\n\n")
-                            Log.e("Name ===>",phoneNumValue);
-                        }
-                    }
-                    cursorPhone?.close()
-                }
-            }
-        } else {
-            //   toast("No contacts available!")
-        }
-        cursor?.close()
-        return builder
-    }
 
 
     override fun onRequestPermissionsResult(
@@ -124,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                 var i = 0
                 while (i < grantResults.size) {
                     if (grantResults.isNotEmpty() && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        val allContacts = getContacts()
+                        val allContacts = getContactsList()
                         Log.d("MAin", "onRequestPermissionsResult: $allContacts")
                     } else {
                         Toast.makeText(
